@@ -5,10 +5,10 @@ from openpyxl import load_workbook
 import boto3
 import re
 
-parser = argparse.ArgumentParser(description="Example: python aws-ec2-pricing.py -f <file-name>.xlsx -r us-west-2 -i m5 -v gp2")
+parser = argparse.ArgumentParser(description="Example: python aws-ec2-pricing.py -f <file>.xlsx -r us-west-2 -i m5 -v gp2")
 parser.add_argument('-f', '--file', help='File name of the Excel workbook', required=True)
 parser.add_argument('-r', '--reg', help='AWS region, i.e. us-west-2', required=True)
-parser.add_argument('-i', '--inst', help='EC2 instance type, supported values: all, t2, m5, m4', required=True)
+parser.add_argument('-i', '--inst', help='EC2 instance type, supported values: all, t3, t2, m5, m4', required=True)
 parser.add_argument('-v', '--vol', help='EBS volume type, supported values: gp2, st1', required=True)
 args = parser.parse_args()
 #print (args.file)
@@ -69,6 +69,14 @@ else:
 
 if (args.inst) == 'all':
 	instanceVar = "all"
+elif (args.inst) == 't3':
+	instanceVar = [['t3.nano',2,0.5],
+				   ['t3.micro',2,1],
+				   ['t3.small',2,2],
+				   ['t3.medium',2,4],
+				   ['t3.large',2,8],
+				   ['t3.xlarge',4,16],
+				   ['t3.2xlarge',8,32]]
 elif (args.inst) == 't2':
 	instanceVar = [['t2.nano',1,0.5],
 				   ['t2.micro',1,1],
@@ -92,7 +100,7 @@ elif (args.inst) == 'm4':
 				   ['m4.10xlarge',40,160],
 				   ['m4.16xlarge',64,256]]	
 else:
-	exit("error: no valid instance family: all, t2, m5, m4")
+	exit("error: no valid instance family: all, t3, t2, m5, m4")
 
 def rowRange():
 	global row_count

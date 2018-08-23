@@ -5,20 +5,22 @@ from openpyxl import load_workbook
 import boto3
 import re
 
-parser = argparse.ArgumentParser(description="Example: python aws-ec2-pricing.py -f <file>.xlsx -r us-west-2 -i m5 -v gp2")
+parser = argparse.ArgumentParser(description="Example: python aws-ec2-pricing.py -f <file>.xlsx -w <worksheet> -r us-west-2 -i m5 -v gp2")
 parser.add_argument('-f', '--file', help='File name of the Excel workbook', required=True)
+parser.add_argument('-w', '--ws', help='Worksheet or tab name of the Excel workbook', required=True)
 parser.add_argument('-r', '--reg', help='AWS region, i.e. us-west-2', required=True)
-parser.add_argument('-i', '--inst', help='EC2 instance type, supported values: all, t3, t2, m5, m4', required=True)
-parser.add_argument('-v', '--vol', help='EBS volume type, supported values: gp2, st1', required=True)
+parser.add_argument('-i', '--inst', help='EC2 supported values: all, t3, t2, m5, m4', required=True)
+parser.add_argument('-v', '--vol', help='EBS supported values: gp2, st1', required=True)
 args = parser.parse_args()
 #print (args.file)
+#print (args.ws)
 #print (args.reg)
 #print (args.inst)
 #print (args.vol)
 
 # Excel workbook and worksheet variables
 wb = load_workbook(args.file) # The name of the workbook file to open passed from argparse
-ws = wb["Data"] # The name of the worksheet to manipulate
+ws = wb[args.ws] # The name of the worksheet to manipulate
 ws.cell(row=(1), column=6).value = 'Instance CPU'
 ws.cell(row=(1), column=7).value = 'Instance RAM'
 ws.cell(row=(1), column=8).value = 'Instance Final'

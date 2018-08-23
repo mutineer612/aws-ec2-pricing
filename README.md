@@ -1,5 +1,5 @@
 # aws-ec2-pricing
-This python script reads the 'Data' worksheet of a formatted Excel workbook based on the included Hosts.xlsx spreadsheet file.  The script uses the CPU, RAM, Storage, and OS values along with command line parameters to assign instance types from the General Purpose family of AWS instances.  After running the script once you may assign any instance type in the 'Instance Final' column and run the script again using the -i switch with 'all' parameter to read existing instance values as input. Pricing is provided as a unit and daily cost in USD via AWS Pricing API.      
+This python script reads the worksheet of a formatted Excel workbook based on the included Hosts.xlsx spreadsheet file.  The script uses the CPU, RAM, Storage, and OS values along with command line parameters to assign instance types from the General Purpose family of AWS instances.  After running the script once you may assign any instance type in the 'Instance Final' column and run the script again using the -i switch with 'all' parameter to read existing instance values as input. Pricing is provided as a unit and daily cost in USD via AWS Pricing API.      
 
 ## Setup
 To use this script you will need an AWS Account, Python, and AWS CLI.
@@ -69,11 +69,11 @@ If command is not found in step 5 you will need to add it to the PATH.
 Place the aws-ec2-pricing.py script and Hosts.xlsx file in the same directory.  Use the -h switch to displays help info and available options.
 
 ### Assign initial instance type and price
-Example: `C:\>python aws-ec2-pricing.py -f Hosts.xlsx -r us-west-2 -i m5 -v gp2`
+Example: `C:\>python aws-ec2-pricing.py -f Hosts.xlsx -w Data -r us-west-2 -i m5 -v gp2`
 - The script inspects the CPU and RAM values and selects an EC2 instance from the m5 family that will support the larger of the 2 variables.  As the script iterates through the rows it will convert storage from MB to GB and inspect the OS and retrieve the pricing matching the instance type, OS, storage and region.
 
 ### Read instance value and update pricing
-Example: `C:\>python aws-ec2-pricing.py -f Hosts.xlsx -r us-west-2 -i all -v gp2`
+Example: `C:\>python aws-ec2-pricing.py -f Hosts.xlsx -w Data -r us-west-2 -i all -v gp2`
 - Using the 'all' parameter with the -i switch provides the option to manually assign instance types after initial assignment using any available instance type.  This skips the assignment and reads the value in the 'Instance Final' column and updates pricing accordingly.  
 
 ## Assumptions & Considerations

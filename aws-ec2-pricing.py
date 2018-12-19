@@ -1,6 +1,6 @@
 #! /usr/local/bin/python3
 
-import argparse 
+import argparse
 from openpyxl import load_workbook
 import boto3
 import re
@@ -35,38 +35,40 @@ preInstalledSw = "NA" # NA, SQL Ent, SQL Std, SQL Web
 licenseModel = "No License required" # Bring your own license, NA, No License required
 
 # AWS Regions excluding China and US Government
-regionVar = [['us-east-1','US East (N. Virginia)'],
-			 ['us-east-2','US East (Ohio)'],
-			 ['us-west-1','US West (N. California)'],
-			 ['us-west-2','US West (Oregon)'],
-			 ['ca-central-1','Canada (Central)'],
-			 ['eu-west-1','EU (Ireland)'],
-			 ['eu-west-2','EU (London)'],
-			 ['eu-west-3','EU (Paris)'],
-			 ['eu-central-1','EU (Frankfurt)'],
-			 ['ap-south-1','Asia Pacific (Mumbai)'],
-			 ['ap-northeast-1','Asia Pacific (Tokyo)'],
-			 ['ap-northeast-2','Asia Pacific (Seoul)'],
-			 ['ap-southeast-1','Asia Pacific (Singapore)'],
-			 ['ap-southeast-2','Asia Pacific (Sydney)'],
-			 ['sa-east-1','South America (Sao Paulo)']]
+regionVar = [['ap-south-1','Asia Pacific (Mumbai)'],
+	     	 ['ap-northeast-3','Asia Pacific (Osaka-Local)'],
+       	     ['ap-northeast-2','Asia Pacific (Seoul)'],
+             ['ap-southeast-1','Asia Pacific (Singapore)'],
+	         ['ap-southeast-2','Asia Pacific (Sydney)'],
+	         ['ap-northeast-1','Asia Pacific (Tokyo)'],
+	         ['ca-central-1','Canada (Central)'],
+	         ['eu-central-1','EU (Frankfurt)'],
+	         ['eu-west-1','EU (Ireland)'],
+	         ['eu-west-2','EU (London)'],
+	         ['eu-west-3','EU (Paris)'],
+	         ['eu-north-1','EU (Stockholm)'],
+	         ['sa-east-1','South America (Sao Paulo)'],
+	         ['us-east-1','US East (N. Virginia)'],
+	         ['us-east-2','US East (Ohio)'],
+	         ['us-west-1','US West (N. California)'],
+	         ['us-west-2','US West (Oregon)']]
 
 # Dynamic AWS Pricing API location variable
 for x in regionVar:
-	#print (args.reg)	
-	
+	#print (args.reg)
+
 	if (args.reg) == (x[0]):
 		location = (x[1])
 		#print (location)
-	
-# Dynamic AWS Pricing API volumeType variable  
+
+# Dynamic AWS Pricing API volumeType variable
 # EBS Volume Types: Cold HDD, General Purpose, Magnetic, Provisioned IOPS, Throughput Optimized HDD.
-if (args.vol) == 'gp2':						
+if (args.vol) == 'gp2':
 	volumeType = 'General Purpose'
 elif (args.vol) == 'st1':
 	volumeType = 'Throughput Optimized HDD'
 else:
-	exit("error: no valid volume type: gp2, st1")	
+	exit("error: no valid volume type: gp2, st1")
 #print (volumeType)
 
 if (args.inst) == 'all':
@@ -100,7 +102,7 @@ elif (args.inst) == 'm4':
 				   ['m4.2xlarge',8,32],
 				   ['m4.4xlarge',16,64],
 				   ['m4.10xlarge',40,160],
-				   ['m4.16xlarge',64,256]]	
+				   ['m4.16xlarge',64,256]]
 else:
 	exit("error: no valid instance family: all, t3, t2, m5, m4")
 
@@ -108,14 +110,14 @@ def rowRange():
 	global row_count
 	row_count = 0
 	for x in range(2,10000):
-	
-		if ws.cell(row=x,column=1).value != None:        
+
+		if ws.cell(row=x,column=1).value != None:
 			#print(ws.cell(row=x,column=13).value)
 			row_count = row_count + 1
-		else: 
+		else:
 			break
-	
-	row_count = row_count + 2		
+
+	row_count = row_count + 2
 	#print (row_count)
 
 def assignInstance():
@@ -123,107 +125,107 @@ def assignInstance():
 	global instanceError
 	instanceError = 0
 	#print (instanceError)
-	
+
 	for x in range(2, row_count):
 		sourceCpu = (ws.cell(row=(x), column=2).value)
-		
+
 		for y in instanceVar:
 			instanceCpu = (y[1])
-			
+
 			if (sourceCpu) <= (instanceCpu):
 				selectInstance = (y[0])
 				#print (sourceCpu,instanceCpu)
 				ws.cell(row=(x), column=6).value = (selectInstance)
-			
+
 				break
 
 	for x in range(2, row_count):
 		sourceRam = (ws.cell(row=x, column=3).value)/1024
-				
+
 		for y in instanceVar:
 			instanceRam = (y[2])
-			
+
 			if (sourceRam-2) <= (instanceRam):
 				selectInstance = (y[0])
 				#print (sourceRam,instanceRam)
 				ws.cell(row=(x), column=7).value = (selectInstance)
-			
+
 				break
-			
+
 	for x in range(2, row_count):
 		i1 = (ws.cell(row=x, column=6).value)
 		i2 = (ws.cell(row=x, column=7).value)
 		#print (i1)
 		#print (i2)
-		
+
 		for y in instanceVar:
 			instanceType = (y[0])
-			
+
 			if (i1) == (instanceType):
 				i1ram = (y[2])
 				#print (i1ram)
-		
+
 		for y in instanceVar:
-			instanceType = (y[0])			
-		
+			instanceType = (y[0])
+
 			if (i2) == (instanceType):
 				i2ram = (y[2])
 				#print (i2ram)
-		
-		if i2 != None:								
+
+		if i2 != None:
 			if (i1ram) <= (i2ram):
 				selectInstance = i2
-				ws.cell(row=(x), column=8).value = (selectInstance)  
+				ws.cell(row=(x), column=8).value = (selectInstance)
 			else:
-				selectInstance = i1	    
+				selectInstance = i1
 				ws.cell(row=(x), column=8).value = (selectInstance)
 		else:
 			instanceError = instanceError + 1
-			#print (instanceError)	
-	
+			#print (instanceError)
+
 	if instanceError == 0:
 		awsPricing()
-	else: 
+	else:
 		print("Error: Hosts source RAM is too large for {} instance(s)!".format(instanceError))
 		print("Manually assign 'Instance Final' and re-run script using -i all")
 
 def awsPricing():
 	pricing = boto3.client('pricing')
 	global row_count
-	for x in range(2, row_count):		
+	for x in range(2, row_count):
 		# Dynamic AWS Pricing API instanceType variable
 		instanceType = (ws.cell(row=x, column=8).value)
-	
-		# Dynamic AWS Pricing API operatingSystem variable 
+
+		# Dynamic AWS Pricing API operatingSystem variable
 		# Operating System Types: Generic, Linux, NA, RHEL, SUSE, Windows
 		operatingSystemString = (ws.cell(row=x, column=5).value)
 		operatingSystemMatch = re.search( r'.*(Windows|Red Hat|SUSE).*', operatingSystemString, re.S)
-	
+
 		if operatingSystemMatch:
 			if operatingSystemMatch.group(1) == 'Windows':
 				operatingSystem = "Windows"
 			elif operatingSystemMatch.group(1) == 'Red Hat':
 				operatingSystem = "RHEL"
 			elif operatingSystemMatch.group(1) == 'SUSE':
-				operatingSystem = "SUSE"	
-			else: 
-				operatingSystem = "Linux"		
+				operatingSystem = "SUSE"
+			else:
+				operatingSystem = "Linux"
 		else:
-			operatingSystem = "Linux"		
-	
-		#print (operatingSystem)	
-			
+			operatingSystem = "Linux"
+
+		#print (operatingSystem)
+
 		# AWS Pricing API EC2 Instance Attribute Match
 		instanceData = pricing.get_products(
     		ServiceCode='AmazonEC2',
      		Filters = [
-        		{'Type' :'TERM_MATCH', 'Field':'location',        'Value':location		  }, 
-         		{'Type' :'TERM_MATCH', 'Field':'tenancy',         'Value':tenancy         }, 
-         		{'Type' :'TERM_MATCH', 'Field':'instanceType',    'Value':instanceType    }, 
-         		{'Type' :'TERM_MATCH', 'Field':'operatingSystem', 'Value':operatingSystem }, 
-         		{'Type' :'TERM_MATCH', 'Field':'preInstalledSw',  'Value':preInstalledSw  }, 
-         		{'Type' :'TERM_MATCH', 'Field':'licenseModel',    'Value':licenseModel    }, 
- 
+        		{'Type' :'TERM_MATCH', 'Field':'location',        'Value':location		  },
+         		{'Type' :'TERM_MATCH', 'Field':'tenancy',         'Value':tenancy         },
+         		{'Type' :'TERM_MATCH', 'Field':'instanceType',    'Value':instanceType    },
+         		{'Type' :'TERM_MATCH', 'Field':'operatingSystem', 'Value':operatingSystem },
+         		{'Type' :'TERM_MATCH', 'Field':'preInstalledSw',  'Value':preInstalledSw  },
+         		{'Type' :'TERM_MATCH', 'Field':'licenseModel',    'Value':licenseModel    },
+
      		],
      		#MaxResults=100
 		)
@@ -237,20 +239,20 @@ def awsPricing():
 			instanceUnitPrice = instancePrice.group(1)
 			ws.cell(row=(x), column=9).value = (instanceUnitPrice)
 			#print ("Instance Unit Price:   " + (instanceUnitPrice))
-		
+
 			instanceDailyPrice = (float(instanceUnitPrice) * 24)
 			#instanceDailyPrice = round(instanceDailyPrice,10)
 			ws.cell(row=(x), column=10).value = (instanceDailyPrice)
-			#print ("Instance Daily Price:  " + str(instanceDailyPrice)) 
+			#print ("Instance Daily Price:  " + str(instanceDailyPrice))
 		else:
 			print ("No instance price match!")
-		
+
 		# EBS Storage Attribute Match
 		storageData = pricing.get_products(
     		ServiceCode='AmazonEC2',
     		Filters = [
-        		{'Type' :'TERM_MATCH', 'Field':'location',        'Value':location		  }, 
-         		{'Type' :'TERM_MATCH', 'Field':'volumeType',      'Value':volumeType 	  }, 
+        		{'Type' :'TERM_MATCH', 'Field':'location',        'Value':location		  },
+         		{'Type' :'TERM_MATCH', 'Field':'volumeType',      'Value':volumeType 	  },
      		],
      		#MaxResults=100
 		)
@@ -264,21 +266,21 @@ def awsPricing():
 			storageUnitPrice = storagePrice.group(1)
 			ws.cell(row=(x), column=11).value = (storageUnitPrice)
 			#print ("Storage Unit Price:    " + (storageUnitPrice))
-		
+
 			storageDailyPrice = ((float(storageUnitPrice) * 86400) / (86400 * 30))
 			#storageDailyPrice = round(storageDailyPrice,10)
 			volumeSizeGB = ((ws.cell(row=x, column=4).value) / 1024)
 			storageDailyPrice = (storageDailyPrice * volumeSizeGB)
 			ws.cell(row=(x), column=12).value = (storageDailyPrice)
-			#print ("Storage Daily Price:   " + str(storageDailyPrice)) 	  
+			#print ("Storage Daily Price:   " + str(storageDailyPrice))
 		else:
-			print ("No storage price match!")		
-			
+			print ("No storage price match!")
+
 if instanceVar == 'all':
-	rowRange()			   
+	rowRange()
 	awsPricing()
 else:
 	rowRange()
 	assignInstance()
-		
-wb.save(args.file)	                                           
+
+wb.save(args.file)

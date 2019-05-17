@@ -39,6 +39,7 @@ To use this script you will need an AWS Account, Python, and AWS CLI.
 - `C:\>python -m pip list` Lists installed Python modules
 - `C:\>python -m pip install argparse` Install the argparse module if not already installed by the installer
 - `C:\>python -m pip install boto3` Install the AWS module
+- `C:\>python -m pip install json` Install the json module
 - `C:\>python -m pip install openpyxl` Install the Excel read/write module
    
 ### AWS CLI for Windows:
@@ -54,15 +55,16 @@ For MacOS use Homebrew to install Python3, PIP, and AWS CLI *Some of the below c
 1. Install Homebrew using the following command:   
    `/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
 2. `brew list` Lists installed packages
-3. `brew install python3` Installs Python3, you should now have python 2.X that ships with MacOS and python3 installed
-5. `pip3 install awscli --upgrade --user` Use PIP to install AWS CLI
-6. `aws --version` Verify that the AWS CLI is installed correctly  
+3. `brew install python3` Install Python3, you should now have python 2.X that ships with MacOS and python3 installed
+5. `brew install awscli` Install AWS CLI
+6. `aws --version` Verify that the AWS CLI is installed correctly
+7. Use pip3 to install the same modules listed above in Python for Windows steps.
 
 If command is not found in step 5 you will need to add it to the PATH.
 1. `$PATH` Check the current PATH
-2. `export PATH=/Users/USERNAME/Library/Python/3.6/bin/:$PATH` Add Python3 bin folder to PATH
+2. `export PATH=/Users/USERNAME/Library/Python/3.X/bin/:$PATH` Add Python3 bin folder to PATH
 3. `$PATH` Check PATH again
-4. `vi .bash_profile` Add to bash profile: `export PATH=~/Library/Python/3.6/bin/:$PATH`
+4. `vi .bash_profile` Add to bash profile: `export PATH=~/Library/Python/3.X/bin/:$PATH`
 5. `sudo vi /etc/path` Add /usr/local/sbin after /usr/local/bin  
 
 ## Usage

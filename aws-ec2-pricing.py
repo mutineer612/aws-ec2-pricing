@@ -3,6 +3,7 @@
 import argparse
 from openpyxl import load_workbook
 import boto3
+import json
 import re
 
 parser = argparse.ArgumentParser(description="Example: python aws-ec2-pricing.py -f <file>.xlsx -w <worksheet> -r us-west-2 -i m5 -v gp2")
@@ -230,13 +231,34 @@ def awsPricing():
      		#MaxResults=100
 		)
 
-		instanceString = str(instanceData)
+    	# Return output from pricing API
+		#instanceString = str(instanceData)
 		#print (instanceString)
 
-		instancePrice = re.search( r'"pricePerUnit":{"USD":"(\d{1,10}\.\d{1,10})"}', instanceString, re.S)
+		# When the Capacity Reservation is active, you are charged the equivalent On-Demand rate whether you run the instances or not.
+		# If you do not use the reservation, this shows up as unused reservation on your EC2 bill.
+		# When you run an instance that matches the attributes of a reservation, you just pay for the instance and nothing for the reservation.
 
-		if instancePrice:
-			instanceUnitPrice = instancePrice.group(1)
+		#AllocatedCapacityReservation
+		#UnusedCapacityReservation
+		#Used = OnDemand Pricing
+
+		for instanceVal in instanceData["PriceList"]:
+			instanceValJson=json.loads(instanceVal)
+			if("OnDemand" in instanceValJson["terms"] and len(instanceValJson["terms"]["OnDemand"]) > 0):
+				for onDemandValues in instanceValJson["terms"]["OnDemand"].keys():
+					for priceDimensionValues in instanceValJson["terms"]["OnDemand"][onDemandValues]["priceDimensions"]:
+						if("Used" in instanceValJson["product"]["attributes"]["capacitystatus"]):
+							instancePrice = (instanceValJson["terms"]["OnDemand"][onDemandValues]["priceDimensions"][priceDimensionValues]["pricePerUnit"])
+
+		instanceString = str(instancePrice)
+    	#print (instanceString)
+
+		instanceUnitPrice = re.search( r'(\d{1,10}\.\d{1,10})', instanceString, re.S)
+    	#print (instanceUnitPrice)
+
+		if instanceUnitPrice:
+			instanceUnitPrice = instanceUnitPrice.group(1)
 			ws.cell(row=(x), column=9).value = (instanceUnitPrice)
 			#print ("Instance Unit Price:   " + (instanceUnitPrice))
 
@@ -257,13 +279,25 @@ def awsPricing():
      		#MaxResults=100
 		)
 
+		# Return output from pricing API
 		storageString = str(storageData)
 		#print (storageString)
 
-		storagePrice = re.search( r'"pricePerUnit":{"USD":"(\d{1,10}\.\d{1,10})"}', storageString, re.S)
+		for storageVal in storageData["PriceList"]:
+			storageValJson=json.loads(storageVal)
+			if("OnDemand" in storageValJson["terms"] and len(storageValJson["terms"]["OnDemand"]) > 0):
+				for onDemandValues in storageValJson["terms"]["OnDemand"].keys():
+					for priceDimensionValues in storageValJson["terms"]["OnDemand"][onDemandValues]["priceDimensions"]:
+						storagePrice = (storageValJson["terms"]["OnDemand"][onDemandValues]["priceDimensions"][priceDimensionValues]["pricePerUnit"])
 
-		if storagePrice:
-			storageUnitPrice = storagePrice.group(1)
+		storageString = str(storagePrice)
+		#print (storageString)
+
+		storageUnitPrice = re.search( r'(\d{1,10}\.\d{1,10})', storageString, re.S)
+		#print (storageUnitPrice)
+
+		if storageUnitPrice:
+			storageUnitPrice = storageUnitPrice.group(1)
 			ws.cell(row=(x), column=11).value = (storageUnitPrice)
 			#print ("Storage Unit Price:    " + (storageUnitPrice))
 
